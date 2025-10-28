@@ -84,6 +84,14 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // Ensure the C++ STL used by native modules is the shared libc++ so
+        // symbol resolution for std::* and exception/runtime support works
+        // consistently across modules.
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -103,6 +111,22 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    // Packaging option: when multiple modules include libc++_shared.so, pick
+    // the first occurrence to avoid duplicate-file packaging errors and make
+    // the shared C++ runtime available to all native modules.
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+    }
+
+    // Use the app-level CMakeLists wrapper (in src/main/jni) so we can customize
+    // linking behavior (for example, force libc++_shared) without editing files
+    // inside node_modules. See android/app/src/main/jni/CMakeLists.txt
+    externalNativeBuild {
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
         }
     }
 }
