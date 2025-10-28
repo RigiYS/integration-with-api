@@ -3,9 +3,9 @@ import { View, Text, ActivityIndicator, FlatList, RefreshControl, StyleSheet } f
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getFilms, Film } from '../api/data';
 import MovieCard from '../components/MovieCard';
-import type { HomeStackParamList } from '../../App';
+import type { RootStackParamList } from '../../App';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'MovieList'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'MovieList'>;
 
 export default function MovieListScreen({ navigation }: Props) {
   const [data, setData] = useState<Film[]>([]);
@@ -56,7 +56,7 @@ export default function MovieListScreen({ navigation }: Props) {
 
   return (
     <FlatList
-      contentContainerStyle={{ paddingTop: 8 as number, paddingBottom: 8 as number }}
+      contentContainerStyle={{ paddingVertical: 8 }}
       data={data}
       keyExtractor={(item) => item.id}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

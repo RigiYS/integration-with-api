@@ -1,27 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getFilmById, Film } from '../api/data';
-import type { HomeStackParamList } from '../../App';
+import type { RootStackParamList } from '../../App';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'MovieDetail'>; 
+type Props = NativeStackScreenProps<RootStackParamList, 'MovieDetail'>;
 
-export default function MovieDetailScreen({ route, navigation }: Props) {
+export default function MovieDetailScreen({ route }: Props) {
   const { id } = route.params;
   const [film, setFilm] = useState<Film | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const navigateToPlayer = (mediaType: 'video' | 'music') => {
-    const playerTitle = `${mediaType === 'video' ? 'Trailer' : 'Soundtrack'} ${film?.title || 'Film'}`;
-    
-    navigation.navigate('VideoPlayer', { 
-        title: playerTitle, 
-        mediaType,
-        filmId: film?.id, 
-        mediaId: undefined,
-    });
-  };
 
   useEffect(() => {
     (async () => {
@@ -29,29 +18,13 @@ export default function MovieDetailScreen({ route, navigation }: Props) {
         setError(null);
         const data = await getFilmById(id);
         setFilm(data);
-        navigation.setOptions({ title: data.title });
       } catch (e: any) {
         setError(e.message || 'Failed to load detail');
       } finally {
         setLoading(false);
       }
     })();
-  }, [id, navigation]);
-
-  const buttonStyle = {
-    button: {
-      flex: 1,
-      borderRadius: 8,
-      paddingVertical: 12,
-      alignItems: 'center' as 'center',
-      marginHorizontal: 4,
-    },
-    text: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      fontWeight: '600' as const,
-    },
-  };
+  }, [id]);
 
   if (loading) {
     return (
@@ -78,23 +51,7 @@ export default function MovieDetailScreen({ route, navigation }: Props) {
         <Image source={{ uri: film.image }} style={styles.banner} />
       ) : null}
 
-      <View style={[styles.section, { paddingBottom: 0 }]}>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[buttonStyle.button, { backgroundColor: '#10B981' }]}
-            onPress={() => navigateToPlayer('video')}
-          >
-            <Text style={buttonStyle.text}>▶️ Play Video</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[buttonStyle.button, { backgroundColor: '#3B82F6' }]}
-            onPress={() => navigateToPlayer('music')}
-          >
-            <Text style={buttonStyle.text}>🎵 Play Music</Text>
-          </TouchableOpacity>
-        </View>
-
+      <View style={styles.section}>
         <Text style={styles.title}>{film.title}</Text>
         <Text style={styles.subtitle}>
           Release: {film.release_date} • Runtime: {film.running_time}m • Score: {film.rt_score}
@@ -123,10 +80,4 @@ const styles = StyleSheet.create({
   subtitle: { color: '#6B7280', marginTop: 6 },
   heading: { fontSize: 18, fontWeight: '700', marginBottom: 6 },
   body: { lineHeight: 20, color: '#111827' },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 10,
-    marginHorizontal: -4, 
-  }
 });
